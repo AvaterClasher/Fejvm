@@ -4,7 +4,8 @@ use crate::{
     buffer::BufferReader as Buffer,
     c_pool::ConstantPoolEntry,
     class_access_flags::ClassAccessFlags,
-    class_file::{ClassFile, JAVA7_CLASSFILE},
+    class_file::ClassFile,
+    class_file_version::ClassFileVersion,
     class_reader_error::{ClassReaderError, Result},
 };
 
@@ -43,16 +44,11 @@ impl<'a> Parser<'a> {
     }
 
     fn read_version(&mut self) -> Result<()> {
-        self.class_file.minor_version = self.buffer.read_u16()?;
-        self.class_file.major_version = self.buffer.read_u16()?;
-        if self.class_file.major_version >= JAVA7_CLASSFILE {
-            Err(ClassReaderError::UnsupportedVersion(
-                self.class_file.major_version,
-                self.class_file.minor_version,
-            ))
-        } else {
-            Ok(())
-        }
+        let minor_version = self.buffer.read_u16()?;
+        let major_version = self.buffer.read_u16()?;
+
+        self.class_file.version = ClassFileVersion::from(major_version, minor_version)?;
+        Ok(())
     }
 
     fn read_constants(&mut self) -> Result<()> {
