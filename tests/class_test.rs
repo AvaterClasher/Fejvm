@@ -1,6 +1,7 @@
 use Fejvm::{
-    class_file::{ClassAccessFlags, JAVA6_CLASSFILE},
+    class_file::{JAVA6_CLASSFILE},
     class_reader,
+    class_access_flags::ClassAccessFlags
 };
 use std::path::PathBuf;
 
