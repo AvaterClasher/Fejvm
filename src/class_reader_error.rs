@@ -1,5 +1,5 @@
 use std::io;
-
+use crate::c_pool::InvalidConstantPoolIndexError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -15,3 +15,9 @@ pub enum ClassReaderError {
 }
 
 pub type Result<T> = std::result::Result<T, ClassReaderError>;
+
+impl From<InvalidConstantPoolIndexError> for ClassReaderError {
+    fn from(value: InvalidConstantPoolIndexError) -> Self {
+        Self::InvalidClassData(value.to_string())
+    }
+}

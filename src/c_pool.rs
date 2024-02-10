@@ -19,7 +19,7 @@ pub enum ConstantPoolEntry {
     NameAndTypeDescriptor(u16, u16),
 }
 
-// Constant Pool Physic Entry is Defined here
+// Constant Pool Physics Entry is Defined here
 #[derive(Debug)]
 enum ConstantPoolPhyEntry {
     Entry(ConstantPoolEntry),
@@ -28,7 +28,7 @@ enum ConstantPoolPhyEntry {
 
 // Implementation of the constant pool of a java class.
 // Note that constants are 1-based in java.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ConstantPool {
     entries: Vec<ConstantPoolPhyEntry>,
 }
@@ -40,22 +40,34 @@ pub struct InvalidConstantPoolIndexError {
     pub index: u16,
 }
 
+// Implement methods for the error type
 impl InvalidConstantPoolIndexError {
     fn new(index: u16) -> Self {
         InvalidConstantPoolIndexError { index }
     }
 }
 
+// Implement methods for the constant pool struct
 impl ConstantPool {
+
+    // Constructor for creating a new constant pool
+    pub fn new() -> ConstantPool {
+        Default::default()
+    }
+
     // Adds a new entry.
     pub fn add(&mut self, entry: ConstantPoolEntry) {
+        // Check if the entry type requires a tombstone (e.g., Long or Double)
         let add_tombstone = match &entry {
             ConstantPoolEntry::Long(_) => true,
             ConstantPoolEntry::Double(_) => true,
             _ => false,
         };
+
+        // Push the entry to the constant pool
         self.entries.push(ConstantPoolPhyEntry::Entry(entry));
 
+        // If a tombstone is needed, add a tombstone entry
         if add_tombstone {
             self.entries
                 .push(ConstantPoolPhyEntry::MultiByteEntryTombstone())
@@ -67,11 +79,15 @@ impl ConstantPool {
         &self,
         input_index: u16,
     ) -> Result<&ConstantPoolEntry, InvalidConstantPoolIndexError> {
+        // Check if the index is valid
         if input_index == 0 || input_index as usize > self.entries.len() {
             Err(InvalidConstantPoolIndexError::new(input_index))
         } else {
+            // Adjust the index to be 0-based
             let i = (input_index - 1) as usize;
             let entry = &self.entries[i];
+
+            // Return the entry if it is a valid entry, otherwise return an error
             match entry {
                 ConstantPoolPhyEntry::Entry(entry) => Ok(entry),
                 ConstantPoolPhyEntry::MultiByteEntryTombstone() => {
@@ -81,15 +97,11 @@ impl ConstantPool {
         }
     }
 
-    pub fn new() -> ConstantPool {
-        ConstantPool {
-            entries: Vec::new(),
-        }
-    }
-
+    // Helper method for formatting an entry for display
     fn fmt_entry(&self, idx: u16) -> Result<String, InvalidConstantPoolIndexError> {
         let entry = self.get(idx)?;
         let text = match entry {
+            // Format each type of constant pool entry
             ConstantPoolEntry::String(ref s) => format!("String: \"{}\"", s),
             ConstantPoolEntry::Integer(n) => format!("Integer: {}", n),
             ConstantPoolEntry::Float(n) => format!("Float: {}", n),
@@ -141,9 +153,11 @@ impl ConstantPool {
         Ok(text)
     }
 
+    // Method for getting the textual representation of an entry
     pub fn text_of(&self, idx: u16) -> Result<String, InvalidConstantPoolIndexError> {
         let entry = self.get(idx)?;
         let text = match entry {
+            // Extract text from each type of constant pool entry
             ConstantPoolEntry::String(ref s) => s.clone(),
             ConstantPoolEntry::Integer(n) => n.to_string(),
             ConstantPoolEntry::Float(n) => n.to_string(),
@@ -168,9 +182,13 @@ impl ConstantPool {
     }
 }
 
+// Implement the Display trait for custom display formatting
 impl fmt::Display for ConstantPool {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Display the size of the constant pool
         writeln!(f, "Constant pool: (size: {})", self.entries.len())?;
+
+        // Display each entry in the constant pool
         for (raw_idx, _) in self.entries.iter().enumerate() {
             let index = (raw_idx + 1) as u16;
             writeln!(f, "    {}, {}", index, self.fmt_entry(index)?)?;
@@ -179,19 +197,25 @@ impl fmt::Display for ConstantPool {
     }
 }
 
+// Implement conversion from InvalidConstantPoolIndexError to fmt::Error
 impl From<InvalidConstantPoolIndexError> for fmt::Error {
     fn from(_: InvalidConstantPoolIndexError) -> fmt::Error {
         fmt::Error {}
     }
 }
 
+// Module for unit tests
 #[cfg(test)]
 mod tests {
     use crate::c_pool::{ConstantPool, ConstantPoolEntry, InvalidConstantPoolIndexError};
 
+    // Test the constant pool
     #[test]
     fn constant_pool_works() {
+        // Create a new constant pool
         let mut cp = ConstantPool::new();
+
+        // Add some entries
         cp.add(ConstantPoolEntry::String("hey".to_string()));
         cp.add(ConstantPoolEntry::Integer(1));
         cp.add(ConstantPoolEntry::Float(2.1));
@@ -205,6 +229,7 @@ mod tests {
         cp.add(ConstantPoolEntry::InterfaceMethodReference(1, 10));
         cp.add(ConstantPoolEntry::NameAndTypeDescriptor(1, 10));
 
+        // Perform assertions to check the constant pool
         assert_eq!(
             ConstantPoolEntry::String("hey".to_string()),
             *cp.get(1).unwrap()
@@ -238,6 +263,7 @@ mod tests {
             *cp.get(14).unwrap()
         );
 
+        // Perform assertions to check the textual representation of the constant pool
         assert_eq!("hey", cp.text_of(1).unwrap());
         assert_eq!("1", cp.text_of(2).unwrap());
         assert_eq!("2.1", cp.text_of(3).unwrap());
