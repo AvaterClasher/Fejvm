@@ -49,7 +49,6 @@ impl InvalidConstantPoolIndexError {
 
 // Implement methods for the constant pool struct
 impl ConstantPool {
-
     // Constructor for creating a new constant pool
     pub fn new() -> ConstantPool {
         Default::default()
@@ -58,11 +57,10 @@ impl ConstantPool {
     // Adds a new entry.
     pub fn add(&mut self, entry: ConstantPoolEntry) {
         // Check if the entry type requires a tombstone (e.g., Long or Double)
-        let add_tombstone = match &entry {
-            ConstantPoolEntry::Long(_) => true,
-            ConstantPoolEntry::Double(_) => true,
-            _ => false,
-        };
+        let add_tombstone = matches!(
+            &entry,
+            ConstantPoolEntry::Long(_) | ConstantPoolEntry::Double(_)
+        );
 
         // Push the entry to the constant pool
         self.entries.push(ConstantPoolPhyEntry::Entry(entry));
@@ -220,7 +218,7 @@ mod tests {
         cp.add(ConstantPoolEntry::Integer(1));
         cp.add(ConstantPoolEntry::Float(2.1));
         cp.add(ConstantPoolEntry::Long(123));
-        cp.add(ConstantPoolEntry::Double(3.14));
+        cp.add(ConstantPoolEntry::Double(3.56));
         cp.add(ConstantPoolEntry::ClassReference(1));
         cp.add(ConstantPoolEntry::StringReference(1));
         cp.add(ConstantPoolEntry::String("joe".to_string()));
@@ -238,7 +236,7 @@ mod tests {
         assert_eq!(ConstantPoolEntry::Float(2.1), *cp.get(3).unwrap());
         assert_eq!(ConstantPoolEntry::Long(123i64), *cp.get(4).unwrap());
         assert_eq!(Err(InvalidConstantPoolIndexError::new(5)), cp.get(5));
-        assert_eq!(ConstantPoolEntry::Double(3.14), *cp.get(6).unwrap());
+        assert_eq!(ConstantPoolEntry::Double(3.56), *cp.get(6).unwrap());
         assert_eq!(Err(InvalidConstantPoolIndexError::new(7)), cp.get(7));
         assert_eq!(ConstantPoolEntry::ClassReference(1), *cp.get(8).unwrap());
         assert_eq!(ConstantPoolEntry::StringReference(1), *cp.get(9).unwrap());
@@ -269,7 +267,7 @@ mod tests {
         assert_eq!("2.1", cp.text_of(3).unwrap());
         assert_eq!("123", cp.text_of(4).unwrap());
         assert_eq!(Err(InvalidConstantPoolIndexError::new(5)), cp.text_of(5));
-        assert_eq!("3.14", cp.text_of(6).unwrap());
+        assert_eq!("3.56", cp.text_of(6).unwrap());
         assert_eq!(Err(InvalidConstantPoolIndexError::new(7)), cp.text_of(7));
         assert_eq!("hey", cp.text_of(8).unwrap());
         assert_eq!("hey", cp.text_of(9).unwrap());
