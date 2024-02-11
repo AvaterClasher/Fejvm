@@ -1,6 +1,7 @@
 package Fejvm;
+import java.io.Serializable;
 
-public class hi {
+public class hi implements Cloneable, Serializable {
     private final double real;
     private final double imag;
 

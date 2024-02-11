@@ -10,6 +10,7 @@ fn can_read_class_file() {
     let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     path.push("tests/resources/Fejvm/hi.class");
     let class = class_reader::read(path.as_path()).unwrap();
+    println!("Read class file: {}", class);
     assert_eq!(ClassFileVersion::Jdk6, class.version);
     assert_eq!(
         ClassAccessFlags::PUBLIC | ClassAccessFlags::SUPER,
@@ -17,4 +18,8 @@ fn can_read_class_file() {
     );
     assert_eq!("Fejvm/hi", class.name);
     assert_eq!("java/lang/Object", class.superclass);
+    assert_eq!(
+        vec!("java/lang/Cloneable", "java/io/Serializable"),
+        class.interfaces
+    );
 }
