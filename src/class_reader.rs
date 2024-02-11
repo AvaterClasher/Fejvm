@@ -192,5 +192,24 @@ pub fn read(path: &Path) -> Result<ClassFile> {
     let mut buf: Vec<u8> = Vec::new();
     file.read_to_end(&mut buf)?;
 
-    Parser::new(&buf).parse()
+    read_buffer(&buf)
+}
+
+pub fn read_buffer(buf: &[u8]) -> Result<ClassFile> {
+    Parser::new(buf).parse()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::class_reader::read_buffer;
+    use crate::class_reader_error::ClassReaderError;
+
+    #[test]
+    fn magic_number_is_required() {
+        let data = vec![0x00, 0x01, 0x02, 0x03];
+        assert!(matches!(
+            read_buffer(&data),
+            Err(ClassReaderError::InvalidClassData(s)) if s == "invalid magic number"
+        ));
+    }
 }
