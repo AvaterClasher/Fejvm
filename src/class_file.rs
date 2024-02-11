@@ -1,6 +1,10 @@
 use std::fmt;
 
-use crate::{class_access_flags::ClassAccessFlags, c_pool::ConstantPool, class_file_version::ClassFileVersion};
+use crate::class_file_field::ClassFileField;
+use crate::{
+    c_pool::ConstantPool, class_access_flags::ClassAccessFlags,
+    class_file_version::ClassFileVersion,
+};
 
 /// Represents the content of a .class file.
 #[derive(Debug, Default)]
@@ -11,6 +15,7 @@ pub struct ClassFile {
     pub name: String,
     pub superclass: String,
     pub interfaces: Vec<String>,
+    pub fields: Vec<ClassFileField>,
 }
 
 impl fmt::Display for ClassFile {
@@ -22,6 +27,11 @@ impl fmt::Display for ClassFile {
         )?;
         write!(f, "{}", self.constants)?;
         writeln!(f, "flags: {:?}", self.flags)?;
-        writeln!(f, "interfaces: {:?}", self.interfaces)
+        writeln!(f, "interfaces: {:?}", self.interfaces)?;
+        writeln!(f, "fields:")?;
+        for field in self.fields.iter() {
+            writeln!(f, "  - {}", field)?;
+        }
+        Ok(())
     }
 }

@@ -1,9 +1,10 @@
+extern crate Fejvm;
 use std::path::PathBuf;
 use Fejvm::{
     class_access_flags::ClassAccessFlags, class_file_version::ClassFileVersion, class_reader,
 };
-
-extern crate Fejvm;
+use Fejvm::class_file_field::ClassFileField;
+use Fejvm::field_flags::FieldFlags;
 
 #[test]
 fn can_read_class_file() {
@@ -21,5 +22,22 @@ fn can_read_class_file() {
     assert_eq!(
         vec!("java/lang/Cloneable", "java/io/Serializable"),
         class.interfaces
+    );
+    assert_eq!(
+        vec!(
+            ClassFileField {
+                flags: FieldFlags::PRIVATE | FieldFlags::FINAL,
+                name: "real".to_string(),
+                type_descriptor: "D".to_string(),
+                attributes: vec![],
+            },
+            ClassFileField {
+                flags: FieldFlags::PRIVATE | FieldFlags::FINAL,
+                name: "imag".to_string(),
+                type_descriptor: "D".to_string(),
+                attributes: vec![],
+            }
+        ),
+        class.fields
     );
 }
