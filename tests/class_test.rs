@@ -1,10 +1,13 @@
 extern crate Fejvm;
 use std::path::PathBuf;
+use Fejvm::class_file::ClassFile;
+use Fejvm::class_file_field::ClassFileField;
+use Fejvm::class_file_method::ClassFileMethod;
+use Fejvm::field_flags::FieldFlags;
+use Fejvm::method_flags::MethodFlags;
 use Fejvm::{
     class_access_flags::ClassAccessFlags, class_file_version::ClassFileVersion, class_reader,
 };
-use Fejvm::class_file_field::ClassFileField;
-use Fejvm::field_flags::FieldFlags;
 
 #[test]
 fn can_read_class_file() {
@@ -23,6 +26,12 @@ fn can_read_class_file() {
         vec!("java/lang/Cloneable", "java/io/Serializable"),
         class.interfaces
     );
+
+    check_fields(&class);
+    check_methods(&class);
+}
+
+fn check_fields(class: &ClassFile) {
     assert_eq!(
         vec!(
             ClassFileField {
@@ -40,4 +49,19 @@ fn can_read_class_file() {
         ),
         class.fields
     );
+}
+
+fn check_methods(class: &ClassFile) {
+    assert_eq!(5, class.methods.len());
+    check_method(&class.methods[0], MethodFlags::PUBLIC, "<init>", "(D)V");
+    check_method(&class.methods[1], MethodFlags::PUBLIC, "<init>", "(DD)V");
+    check_method(&class.methods[2], MethodFlags::PUBLIC, "getReal", "()D");
+    check_method(&class.methods[3], MethodFlags::PUBLIC, "getImag", "()D");
+    check_method(&class.methods[4], MethodFlags::PUBLIC, "abs", "()D");
+}
+
+fn check_method(method: &ClassFileMethod, flags: MethodFlags, name: &str, type_descriptor: &str) {
+    assert_eq!(method.flags, flags);
+    assert_eq!(method.name, name);
+    assert_eq!(method.type_descriptor, type_descriptor);
 }
