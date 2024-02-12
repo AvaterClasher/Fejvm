@@ -2,8 +2,8 @@ use std::{fs::File, io::Read, path::Path};
 
 use crate::attribute::Attribute;
 use crate::class_file_field::ClassFileField;
-use crate::field_flags::FieldFlags;
 use crate::class_file_method::ClassFileMethod;
+use crate::field_flags::FieldFlags;
 use crate::method_flags::MethodFlags;
 use crate::{
     buffer::BufferReader as Buffer,
@@ -287,8 +287,6 @@ impl<'a> Parser<'a> {
 }
 
 pub fn read(path: &Path) -> Result<ClassFile> {
-    println!("Reading class from file {}", path.display());
-
     let mut file = File::open(path)?;
     let mut buf: Vec<u8> = Vec::new();
     file.read_to_end(&mut buf)?;

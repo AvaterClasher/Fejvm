@@ -9,11 +9,11 @@ use Fejvm::{
     class_access_flags::ClassAccessFlags, class_file_version::ClassFileVersion, class_reader,
 };
 
+mod utils;
+
 #[test]
-fn can_read_class_file() {
-    let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    path.push("tests/resources/Fejvm/hi.class");
-    let class = class_reader::read(path.as_path()).unwrap();
+fn can_read_constants() {
+    let class = utils::read_class_from_file("Constants");
     println!("Read class file: {}", class);
     assert_eq!(ClassFileVersion::Jdk6, class.version);
     assert_eq!(
