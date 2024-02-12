@@ -6,7 +6,7 @@ use thiserror::Error;
 // https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
 #[derive(Debug, PartialEq)]
 pub enum ConstantPoolEntry {
-    String(String),
+    Utf8(String),
     Integer(i32),
     Float(f32),
     Long(i64),
@@ -100,7 +100,7 @@ impl ConstantPool {
         let entry = self.get(idx)?;
         let text = match entry {
             // Format each type of constant pool entry
-            ConstantPoolEntry::String(ref s) => format!("String: \"{}\"", s),
+            ConstantPoolEntry::Utf8(ref s) => format!("String: \"{}\"", s),
             ConstantPoolEntry::Integer(n) => format!("Integer: {}", n),
             ConstantPoolEntry::Float(n) => format!("Float: {}", n),
             ConstantPoolEntry::Long(n) => format!("Long: {}", n),
@@ -156,7 +156,7 @@ impl ConstantPool {
         let entry = self.get(idx)?;
         let text = match entry {
             // Extract text from each type of constant pool entry
-            ConstantPoolEntry::String(ref s) => s.clone(),
+            ConstantPoolEntry::Utf8(ref s) => s.clone(),
             ConstantPoolEntry::Integer(n) => n.to_string(),
             ConstantPoolEntry::Float(n) => n.to_string(),
             ConstantPoolEntry::Long(n) => n.to_string(),
@@ -214,14 +214,14 @@ mod tests {
         let mut cp = ConstantPool::new();
 
         // Add some entries
-        cp.add(ConstantPoolEntry::String("hey".to_string()));
+        cp.add(ConstantPoolEntry::Utf8("hey".to_string()));
         cp.add(ConstantPoolEntry::Integer(1));
         cp.add(ConstantPoolEntry::Float(2.1));
         cp.add(ConstantPoolEntry::Long(123));
         cp.add(ConstantPoolEntry::Double(3.56));
         cp.add(ConstantPoolEntry::ClassReference(1));
         cp.add(ConstantPoolEntry::StringReference(1));
-        cp.add(ConstantPoolEntry::String("joe".to_string()));
+        cp.add(ConstantPoolEntry::Utf8("joe".to_string()));
         cp.add(ConstantPoolEntry::FieldReference(1, 10));
         cp.add(ConstantPoolEntry::MethodReference(1, 10));
         cp.add(ConstantPoolEntry::InterfaceMethodReference(1, 10));
@@ -229,7 +229,7 @@ mod tests {
 
         // Perform assertions to check the constant pool
         assert_eq!(
-            ConstantPoolEntry::String("hey".to_string()),
+            ConstantPoolEntry::Utf8("hey".to_string()),
             *cp.get(1).unwrap()
         );
         assert_eq!(ConstantPoolEntry::Integer(1), *cp.get(2).unwrap());
@@ -241,7 +241,7 @@ mod tests {
         assert_eq!(ConstantPoolEntry::ClassReference(1), *cp.get(8).unwrap());
         assert_eq!(ConstantPoolEntry::StringReference(1), *cp.get(9).unwrap());
         assert_eq!(
-            ConstantPoolEntry::String("joe".to_string()),
+            ConstantPoolEntry::Utf8("joe".to_string()),
             *cp.get(10).unwrap()
         );
         assert_eq!(

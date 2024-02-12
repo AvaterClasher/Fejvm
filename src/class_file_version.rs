@@ -9,8 +9,9 @@ pub enum ClassFileVersion {
     Jdk1_3,
     Jdk1_4,
     Jdk1_5,
-    #[default]
     Jdk6,
+    #[default]
+    Jdk7,
 }
 
 impl ClassFileVersion {
@@ -22,6 +23,7 @@ impl ClassFileVersion {
             48 => Ok(ClassFileVersion::Jdk1_4),
             49 => Ok(ClassFileVersion::Jdk1_5),
             50 => Ok(ClassFileVersion::Jdk6),
+            51 => Ok(ClassFileVersion::Jdk7),
             _ => Err(ClassReaderError::UnsupportedVersion(major, minor)),
         }
     }
